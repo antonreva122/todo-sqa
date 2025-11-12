@@ -41,3 +41,36 @@ main {
 .placeholder-task {
     text-shadow: DeepSkyBlue 1px 0 10px;
 }
+
+/* todo list style */
+.task-list {
+    list-style-type: none;
+}
+
+/* Each task item */
+.task-list li {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 12px 18px; 
+}
+
+/* Hover effect */
+.task-list li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+/* Task link styling */
+.task-list a {
+    text-decoration: none;
+    color: #0a66c2;
+    font-weight: 500;
+    display: block;
+}
+
+.task-list a:hover {
+    color: #084b8a;
+    text-decoration: underline;
+}

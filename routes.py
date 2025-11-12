@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template
+from flask import render_template, request, redirect, url_for
 from datetime import datetime
 
 todos = [
@@ -38,8 +38,24 @@ def all_tasks():
 
 @app.route("/task/<int:task_id>")
 def task(task_id):
-    task = todos[task_id]
+    index = task_id - 1
+    task = todos[index]
     return render_template("task.html", task=task)    
+
+
+@app.route("/edit-task/<int:task_id>", methods=["GET", "POST"])
+def edit_task(task_id):
+    index = task_id - 1
+    task = todos[index]
+    print(task)
+    if request.method == "POST":
+        title = request.form.get("title")
+        description = request.form.get("description")
+        todos[index]["title"] = title
+        todos[index]["description"] = description
+        return redirect(url_for("task", task_id=task_id))
+    
+    return render_template("task_form.html", task=task)
 
 
 @app.route("/new-task")

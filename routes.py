@@ -1,8 +1,11 @@
-from app import app
+from app import app, db
 from flask import render_template, request, redirect, url_for, flash
 from datetime import datetime
 from forms import LoginForm
-
+from models import User, Todo
+from flask_login import current_user, login_user
+import sqlalchemy as sa
+import sqlalchemy.orm as so
 
 todos = [
     {
@@ -88,12 +91,16 @@ def delete_task(task_id):
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    form = LoginForm()
-    print("login")
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))    
+    form = LoginForm()    
     if form.validate_on_submit():
-        flash(f'Login requested for user {form.username.data}, remember_me={form.remember_me.data}')
-        print('form submitted')
-        return redirect(url_for('index'))
-
-        
+        user = db.session.scalar(
+            sa.select(User).where(User.username == form.username.data)            
+        )
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for(login))
+        login_user(user, remember=form.remember_me.data)      
+        return redirect(url_for('index'))        
     return render_template('login.html', form=form)

@@ -17,10 +17,11 @@ def enter_valid_credentials(client, auth):
         data= {"username": "testuser", "password": "Password123!"},
         follow_redirects = True
     )
-    return resp
+    assert b'Hello Testuser' in resp.data    
+    
 
 @then('I should be redirected to the homepage')
-def redirected_homepage(client, enter_valid_credentials):
-    resp = enter_valid_credentials
+def redirected_homepage(client):
+    resp = client.get('/', follow_redirects = True)
     assert resp.status_code == 200
     assert b'Hello Testuser' in resp.data

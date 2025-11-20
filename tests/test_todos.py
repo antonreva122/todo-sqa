@@ -108,11 +108,11 @@ def test_login_authenticated_user(client, auth):
     assert authenticated_user_response.status_code == 200
     assert b"Hello Testuser" in authenticated_user_response.data 
 
-def test_mark_task_complete(client, auth, user, todo):          
+def test_mark_task_complete(client, auth, todo):          
     todo_id = todo.id
     auth.login()
     resp = client.post(
-        f'/task/{todo_id}/complete',
+        f'/task/{todo_id}/toggle',
         follow_redirects=True
     )
     assert resp.status_code == 200
@@ -128,7 +128,7 @@ def test_can_reopen_completed_todo(client, auth, todo):
     
     # Act: call the reopen route
     auth.login()
-    resp = client.post(f"/task/{todo_id}/reopen", follow_redirects=True)
+    resp = client.post(f"/task/{todo_id}/toggle", follow_redirects=True)
     assert resp.status_code == 200
     
     # Important: refresh from the DB (do NOT trust the old Python object)    

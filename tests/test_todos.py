@@ -103,28 +103,37 @@ def test_delete_task_via_form(client, auth):
     
 def test_login_authenticated_user(client, auth):
     """ Already authenticated user should be taken to the index page """
-    auth.login()
-    
+    auth.login()    
     authenticated_user_response = client.get("/login", follow_redirects=True)
     assert authenticated_user_response.status_code == 200
     assert b"Hello Testuser" in authenticated_user_response.data 
 
-def test_mark_task_complete(client, auth, user):
-    auth.login()  
-    todo = Todo(
-        title="Test task",
-        description="Description here",
-        user=user,
-    )
-    db.session.add(todo)
-    db.session.commit()
+def test_mark_task_complete(client, auth, user, todo):          
     todo_id = todo.id
-
+    auth.login()
     resp = client.post(
         f'/task/{todo_id}/complete',
         follow_redirects=True
     )
-
     assert resp.status_code == 200
     updated = db.session.get(Todo, todo_id)
     assert updated.completed is True
+    assert f"Task {todo.title} marked as completed"
+    
+def test_can_reopen_completed_todo(client, auth, todo):
+    # Arrange: mark the todo as completed
+    todo.completed = True
+    db.session.commit()
+    todo_id = todo.id
+    
+    # Act: call the reopen route
+    auth.login()
+    resp = client.post(f"/task/{todo_id}/reopen", follow_redirects=True)
+    assert resp.status_code == 200
+    
+    # Important: refresh from the DB (do NOT trust the old Python object)    
+    db.session.refresh(todo)    
+    
+    # Assert: task is now reopened
+    assert todo.completed is False
+    assert f"Task {todo.title} reopened.".encode() in resp.data

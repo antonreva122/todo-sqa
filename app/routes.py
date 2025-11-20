@@ -121,3 +121,13 @@ def init_routes(app):
         db.session.commit()
         flash(f"Task {task.title} marked as completed.")
         return redirect(url_for("all_tasks"))
+    
+    @app.route("/task/<int:task_id>/reopen", methods=["Post"])
+    @login_required
+    def task_reopen(task_id):        
+        task = db.session.get(Todo, task_id)
+
+        task.completed = False
+        db.session.commit()
+        flash(f"Task {task.title} reopened.")
+        return redirect(url_for("all_tasks"))

@@ -2,7 +2,7 @@
 import pytest
 from app import create_app, db
 from config import Config
-from app.models import User
+from app.models import User, Todo
 
 
 class TestConfig(Config):
@@ -37,6 +37,18 @@ def user(app):
     db.session.add(u)
     db.session.commit()
     return u
+
+@pytest.fixture
+def todo(app, user):
+    """Create a simple todo in the database."""
+    t = Todo(
+            title="Test task",
+            description="Test description",
+            user=user
+        )
+    db.session.add(t)
+    db.session.commit()
+    return t
 
 
 class AuthActions:

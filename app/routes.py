@@ -13,10 +13,9 @@ from urllib.parse import urlsplit
 def init_routes(app):
     @app.route("/")
     @login_required
-    def index():    
+    def index():
         todo_count = Todo.query.count()
         return render_template("index.html", todo_count=todo_count)
-
 
     @app.route("/tasks")
     @login_required
@@ -24,53 +23,48 @@ def init_routes(app):
         todos = Todo.query.all()
         return render_template("tasks.html", todos=todos)
 
-
     @app.route("/task/<int:task_id>")
     @login_required
-    def task(task_id):          
+    def task(task_id):
         task = db.session.get(Todo, task_id)
         return render_template("task.html", task=task)
 
-
     @app.route("/edit-task/<int:task_id>", methods=["GET", "POST"])
     @login_required
-    def edit_task(task_id):            
+    def edit_task(task_id):
         task = db.session.get(Todo, task_id)
         if request.method == "POST":
             title = request.form.get("title")
-            description = request.form.get("description")        
+            description = request.form.get("description")
             task.title = title
             task.description = description
             db.session.commit()
             return redirect(url_for("task", task_id=task_id))
         return render_template("task_form.html", task=task)
 
-
     @app.route("/new-task", methods=["GET", "POST"])
     @login_required
     def create_task():
-        if request.method == "POST":        
+        if request.method == "POST":
             title = request.form.get("title")
-            description = request.form.get("description")        
+            description = request.form.get("description")
             task = Todo(
                 title=title,
                 description=description,
-                user=current_user, 
+                user=current_user,
             )
             db.session.add(task)
             db.session.commit()
             return redirect(url_for("task", task_id=task.id))
         return render_template("task_form.html", task=None)
 
-
     @app.route("/delete-task/<int:task_id>", methods=["Post"])
     @login_required
-    def delete_task(task_id):        
+    def delete_task(task_id):
         task = db.session.get(Todo, task_id)
         db.session.delete(task)
         db.session.commit()
         return redirect(url_for("all_tasks"))
-
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -85,18 +79,16 @@ def init_routes(app):
                 flash("Invalid username or password")
                 return redirect(url_for("login"))
             login_user(user, remember=form.remember_me.data)
-            next_page = request.args.get("next")        
+            next_page = request.args.get("next")
             if not next_page or urlsplit(next_page).netloc != "":
                 next_page = url_for("index")
             return redirect(next_page)
         return render_template("login.html", form=form)
 
-
     @app.route("/logout")
     def logout():
         logout_user()
         return redirect(url_for("index"))
-
 
     @app.route("/register", methods=["GET", "POST"])
     def register():
@@ -111,20 +103,20 @@ def init_routes(app):
             flash("Congratulations, your registration was successful")
             return redirect(url_for("login"))
         return render_template("register.html", form=form)
-    
+
     # @app.route("/task/<int:task_id>/complete", methods=["Post"])
     # @login_required
-    # def mark_task_complete(task_id):        
+    # def mark_task_complete(task_id):
     #     task = db.session.get(Todo, task_id)
 
     #     task.completed = True
     #     db.session.commit()
     #     flash(f"Task {task.title} marked as completed.")
     #     return redirect(url_for("all_tasks"))
-    
+
     # @app.route("/task/<int:task_id>/reopen", methods=["Post"])
     # @login_required
-    # def task_reopen(task_id):        
+    # def task_reopen(task_id):
     #     task = db.session.get(Todo, task_id)
 
     #     task.completed = False
@@ -137,10 +129,9 @@ def init_routes(app):
         task = db.session.get(Todo, task_id)
         task.completed = not task.completed
         db.session.commit()
-        
+
         if task.completed:
             flash(f"Task {task.title} marked as completed.")
         else:
             flash(f"Task {task.title} reopened.")
-        return redirect(url_for("all_tasks"))    
-        
+        return redirect(url_for("all_tasks"))

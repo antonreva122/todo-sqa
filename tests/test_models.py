@@ -39,4 +39,3 @@ def test_todo_has_completed_flag_defaults_false(app, user):
     db.session.commit()
 
     assert todo.completed is False
-

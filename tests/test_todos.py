@@ -7,10 +7,11 @@ def test_tasks_requires_login(client):
     assert resp.status_code in (301, 302)
     assert "/login" in resp.headers["Location"]
 
+
 def test_index_shows_todo_count(app, client, auth, user):
-    """ checks if the correct template with the correct data is called """
+    """checks if the correct template with the correct data is called"""
     auth.login()
-    
+
     t1 = Todo(title="Task 1", description="Desc 1", user=user)
     t2 = Todo(title="Task 2", description="Desc 2", user=user)
     db.session.add_all([t1, t2])
@@ -21,6 +22,7 @@ def test_index_shows_todo_count(app, client, auth, user):
     assert response.status_code == 200
     # Adjust string to match whatever is in index.html
     assert b"You have 2 tasks in total" in response.data
+
 
 def test_tasks_page_lists_todos(app, client, auth, user):
     # Create some todos directly in the db
@@ -39,7 +41,7 @@ def test_tasks_page_lists_todos(app, client, auth, user):
 
 def test_create_task_via_form(client, auth):
     auth.login()
-    
+
     resp = client.get("/new-task")
     assert resp.status_code == 200
 
@@ -54,35 +56,36 @@ def test_create_task_via_form(client, auth):
     created = db.session.query(Todo).filter_by(title="Form task").first()
     assert created is not None
     assert created.description == "From form"
-    
+
+
 def test_edit_task_via_form(client, auth):
     auth.login()
-    
+
     new_task_response = client.post(
         "/new-task",
         data={"title": "title1", "description": "desc1"},
         follow_redirects=True,
     )
     assert new_task_response.status_code == 200
-    
-    get_edit_response = client.get('/edit-task/1')
+
+    get_edit_response = client.get("/edit-task/1")
     assert get_edit_response.status_code == 200
-    
+
     post_edit_response = client.post(
         "/edit-task/1",
         data={"title": "title1-edited", "description": "desc1-edited"},
-        follow_redirects=True
+        follow_redirects=True,
     )
-    
+
     assert post_edit_response.status_code == 200
     created = db.session.query(Todo).filter_by(title="title1-edited").first()
     assert created is not None
-    assert created.description == "desc1-edited"    
-    
-    
+    assert created.description == "desc1-edited"
+
+
 def test_delete_task_via_form(client, auth):
     auth.login()
-    
+
     new_task_response = client.post(
         "/new-task",
         data={"title": "title1", "description": "desc1"},
@@ -91,49 +94,46 @@ def test_delete_task_via_form(client, auth):
     assert new_task_response.status_code == 200
     created = db.session.query(Todo).filter_by(title="title1").first()
     assert created is not None
-    assert created.description == "desc1"    
-    
-    delete_task_response = client.post(
-        "/delete-task/1",
-        follow_redirects=True
-    )
+    assert created.description == "desc1"
+
+    delete_task_response = client.post("/delete-task/1", follow_redirects=True)
     assert delete_task_response.status_code == 200
     deleted = db.session.query(Todo).filter_by(title="title1").first()
     assert deleted is None
-    
+
+
 def test_login_authenticated_user(client, auth):
-    """ Already authenticated user should be taken to the index page """
-    auth.login()    
+    """Already authenticated user should be taken to the index page"""
+    auth.login()
     authenticated_user_response = client.get("/login", follow_redirects=True)
     assert authenticated_user_response.status_code == 200
-    assert b"Hello Testuser" in authenticated_user_response.data 
+    assert b"Hello Testuser" in authenticated_user_response.data
 
-def test_mark_task_complete(client, auth, todo):          
+
+def test_mark_task_complete(client, auth, todo):
     todo_id = todo.id
     auth.login()
-    resp = client.post(
-        f'/task/{todo_id}/toggle',
-        follow_redirects=True
-    )
+    resp = client.post(f"/task/{todo_id}/toggle", follow_redirects=True)
     assert resp.status_code == 200
     updated = db.session.get(Todo, todo_id)
     assert updated.completed is True
     assert f"Task {todo.title} marked as completed"
-    
+
+
 def test_can_reopen_completed_todo(client, auth, todo):
     # Arrange: mark the todo as completed
     todo.completed = True
     db.session.commit()
     todo_id = todo.id
-    
+
     # Act: call the reopen route
     auth.login()
     resp = client.post(f"/task/{todo_id}/toggle", follow_redirects=True)
     assert resp.status_code == 200
-    
-    # Important: refresh from the DB (do NOT trust the old Python object)    
-    db.session.refresh(todo)    
-    
+
+    # Important: refresh from the DB (do NOT trust the old Python object)
+    db.session.refresh(todo)
+
     # Assert: task is now reopened
     assert todo.completed is False
     assert f"Task {todo.title} reopened.".encode() in resp.data

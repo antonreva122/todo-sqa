@@ -1,12 +1,9 @@
 from app import db
 from flask import render_template, request, redirect, url_for, flash
-from datetime import datetime
 from app.forms import LoginForm, RegistrationForm
 from app.models import User, Todo
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
-import sqlalchemy.orm as so
-from flask import request
 from urllib.parse import urlsplit
 
 

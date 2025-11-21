@@ -19,9 +19,6 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login.init_app(app)
 
-    # Import models so SQLAlchemy registers them
-    from app import models
-
     # Development shortcut only to create tables if they do not exist
     # For Production use: flask db init       # only once per project
     # flask db migrate -m "Initial tables"

@@ -23,3 +23,6 @@ jobs:
 
       - name: Run formatter
         run: black --check .
+
+      - name: Run Linter
+        run: ruff check .

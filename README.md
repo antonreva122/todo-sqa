@@ -6,6 +6,8 @@ The application is intentionally designed as an **educational learning tool**. I
 
 Across steps **step01–step34**, students learn how to build a maintainable, secure, testable, and industry-aligned web application. They gain hands-on experience with Flask, Jinja2, WTForms, SQLAlchemy, authentication, environment variables, linters, formatters, CI pipelines, and modern testing strategies. By the end, learners not only understand how the application works but also how high-quality software is designed, validated, protected, refactored, documented, and delivered in contemporary development teams.
 
+Note: The step numbers provided in brackets serve as a general guide and may not match every implementation precisely.
+
 # Flask Todo App – Full Project Summary (step01–step34)
 
 ## 1. Flask Fundamentals: Routing, Templates, and Project Structure (step01–step06)

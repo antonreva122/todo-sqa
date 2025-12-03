@@ -1,4 +1,37 @@
 {% extends 'base.html' %} 
 {% block main %}
-<p>Hello {{ current_user.username | capitalize }}, You have {{ todo_count }} tasks in total. <a href={{ url_for('all_tasks') }}>Click here </a>to view the tasks </p>
+{% if current_user.is_anonymous %}
+<div class="welcome-section">
+  <div class="welcome-content">
+    <h1>Welcome to Flask Todo</h1>
+    <p>Organize your tasks and boost your productivity</p>
+    <div class="welcome-buttons">
+      <a href="{{ url_for('login') }}" class="btn btn-primary">Sign In</a>
+      <a href="{{ url_for('register') }}" class="btn btn-secondary">Create Account</a>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1>Welcome back, {{ current_user.username | capitalize }}!</h1>
+    <p class="dashboard-subtitle">Here's your task overview</p>
+  </div>
+  
+  <div class="dashboard-grid">
+    <div class="stat-card">
+      <div class="stat-number">{{ todo_count }}</div>
+      <div class="stat-label">Total Tasks</div>
+    </div>
+    
+    <div class="action-card">
+      <h3>Quick Actions</h3>
+      <div class="action-buttons">
+        <a href="{{ url_for('all_tasks') }}" class="btn btn-primary">View All Tasks</a>
+        <a href="{{ url_for('create_task') }}" class="btn btn-success">Create New Task</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}

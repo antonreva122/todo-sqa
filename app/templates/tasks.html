@@ -1,11 +1,29 @@
 {% extends 'base.html' %} 
 {% block main %}
-  <h1>Your Task List</h1>
+<div class="tasks-container">
+  <div class="tasks-header">
+    <h1>Your Tasks</h1>
+    <a href="{{ url_for('create_task') }}" class="btn btn-success">Add New Task</a>
+  </div>
+  
+  {% if todos %}
   <ul class="task-list">
     {% for todo in todos %}
-    <li><a href="{{ url_for('task', task_id=todo.id) }}">{{ todo.title }}</a></li>
-    {% else %} 
-    <li class="placeholder-task">You're all done.... Or are you? Challenge yourself, add some new tasks to accomplish.</li>
+    <li class="task-item {% if todo.completed %}completed{% endif %}">
+      <a href="{{ url_for('task', task_id=todo.id) }}" class="task-link">
+        <span class="task-checkbox">{% if todo.completed %}✓{% endif %}</span>
+        <span class="task-title">{{ todo.title }}</span>
+      </a>
+    </li>
     {% endfor %}
   </ul>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">✨</div>
+    <h2>No tasks yet</h2>
+    <p>You're all caught up! Time to add some new goals.</p>
+    <a href="{{ url_for('create_task') }}" class="btn btn-primary">Create Your First Task</a>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

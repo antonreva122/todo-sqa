@@ -1,10 +1,30 @@
 from app import db
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, abort
 from app.forms import LoginForm, RegistrationForm
 from app.models import User, Todo
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
 from urllib.parse import urlsplit
+
+
+def get_user_task_or_404(task_id):
+    """
+    Retrieve a task by ID and verify it belongs to the current user.
+    Returns the task if authorized, otherwise aborts with 404.
+    
+    Args:
+        task_id: The ID of the task to retrieve
+        
+    Returns:
+        Todo: The task object if authorized
+        
+    Raises:
+        404 error: If task doesn't exist or doesn't belong to current user
+    """
+    task = db.session.get(Todo, task_id)
+    if task is None or task.user_id != current_user.id:
+        abort(404)
+    return task
 
 
 def init_routes(app):
@@ -17,25 +37,35 @@ def init_routes(app):
     @app.route("/tasks")
     @login_required
     def all_tasks():
-        todos = Todo.query.all()
+        todos = Todo.query.filter_by(user_id=current_user.id).all()
         return render_template("tasks.html", todos=todos)
 
     @app.route("/task/<int:task_id>")
     @login_required
     def task(task_id):
-        task = db.session.get(Todo, task_id)
+        task = get_user_task_or_404(task_id)
         return render_template("task.html", task=task)
 
     @app.route("/edit-task/<int:task_id>", methods=["GET", "POST"])
     @login_required
     def edit_task(task_id):
-        task = db.session.get(Todo, task_id)
+        task = get_user_task_or_404(task_id)
         if request.method == "POST":
-            title = request.form.get("title")
-            description = request.form.get("description")
+            title = request.form.get("title", "").strip()
+            description = request.form.get("description", "").strip()
+            if not title:
+                flash("Title is required")
+                return redirect(url_for("edit_task", task_id=task_id))
+            if len(title) > 255:
+                flash("Title must be less than 255 characters")
+                return redirect(url_for("edit_task", task_id=task_id))
+            if len(description) > 2000:
+                flash("Description must be less than 2000 characters")
+                return redirect(url_for("edit_task", task_id=task_id))
             task.title = title
             task.description = description
             db.session.commit()
+            flash(f"Task '{task.title}' updated successfully")
             return redirect(url_for("task", task_id=task_id))
         return render_template("task_form.html", task=task)
 
@@ -43,8 +73,17 @@ def init_routes(app):
     @login_required
     def create_task():
         if request.method == "POST":
-            title = request.form.get("title")
-            description = request.form.get("description")
+            title = request.form.get("title", "").strip()
+            description = request.form.get("description", "").strip()
+            if not title:
+                flash("Title is required")
+                return redirect(url_for("create_task"))
+            if len(title) > 255:
+                flash("Title must be less than 255 characters")
+                return redirect(url_for("create_task"))
+            if len(description) > 2000:
+                flash("Description must be less than 2000 characters")
+                return redirect(url_for("create_task"))
             task = Todo(
                 title=title,
                 description=description,
@@ -52,15 +91,18 @@ def init_routes(app):
             )
             db.session.add(task)
             db.session.commit()
+            flash(f"Task '{task.title}' created successfully")
             return redirect(url_for("task", task_id=task.id))
         return render_template("task_form.html", task=None)
 
-    @app.route("/delete-task/<int:task_id>", methods=["Post"])
+    @app.route("/delete-task/<int:task_id>", methods=["POST"])
     @login_required
     def delete_task(task_id):
-        task = db.session.get(Todo, task_id)
+        task = get_user_task_or_404(task_id)
+        task_title = task.title
         db.session.delete(task)
         db.session.commit()
+        flash(f"Task '{task_title}' deleted successfully")
         return redirect(url_for("all_tasks"))
 
     @app.route("/login", methods=["GET", "POST"])
@@ -104,12 +146,12 @@ def init_routes(app):
     @app.route("/task/<int:task_id>/toggle", methods=["POST"])
     @login_required
     def toggle_task_completion(task_id):
-        task = db.session.get(Todo, task_id)
+        task = get_user_task_or_404(task_id)
         task.completed = not task.completed
         db.session.commit()
 
         if task.completed:
-            flash(f"Task {task.title} marked as completed.")
+            flash(f"Task '{task.title}' marked as completed.")
         else:
-            flash(f"Task {task.title} reopened.")
+            flash(f"Task '{task.title}' reopened.")
         return redirect(url_for("all_tasks"))

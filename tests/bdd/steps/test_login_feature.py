@@ -31,7 +31,7 @@ def enter_valid_credentials(client):
 @then("I should be redirected to the homepage")
 def should_be_redirected_to_homepage(login_response):
     assert login_response.status_code == 200
-    assert b"Hello Testuser" in login_response.data
+    assert b"Welcome back, Testuser" in login_response.data
 
 
 @when("I enter an incorrect password", target_fixture="login_response")

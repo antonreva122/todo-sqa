@@ -41,7 +41,7 @@ def test_authenticated_register(client, auth):
     """If the user is already logged in, then redirect to index"""
     auth.login()
     resp = client.get("/register", follow_redirects=True)
-    assert b"Hello Testuser" in resp.data
+    assert b"Welcome back, Testuser" in resp.data
 
 
 def test_register(client):

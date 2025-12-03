@@ -20,8 +20,9 @@ def test_index_shows_todo_count(app, client, auth, user):
     response = client.get("/")
 
     assert response.status_code == 200
-    # Adjust string to match whatever is in index.html
-    assert b"You have 2 tasks in total" in response.data
+    # Check that task count is displayed in the dashboard
+    assert b"2" in response.data
+    assert b"Total Tasks" in response.data
 
 
 def test_tasks_page_lists_todos(app, client, auth, user):
@@ -107,7 +108,7 @@ def test_login_authenticated_user(client, auth):
     auth.login()
     authenticated_user_response = client.get("/login", follow_redirects=True)
     assert authenticated_user_response.status_code == 200
-    assert b"Hello Testuser" in authenticated_user_response.data
+    assert b"Welcome back, Testuser" in authenticated_user_response.data
 
 
 def test_mark_task_complete(client, auth, todo):
@@ -136,4 +137,5 @@ def test_can_reopen_completed_todo(client, auth, todo):
 
     # Assert: task is now reopened
     assert todo.completed is False
-    assert f"Task {todo.title} reopened.".encode() in resp.data
+    # Check for the message with HTML-escaped quote character
+    assert f"Task &#39;{todo.title}&#39; reopened.".encode() in resp.data

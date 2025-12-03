@@ -22,7 +22,7 @@ jobs:
         run: pytest tests/ -q
 
       - name: Run formatter
-        run: black --check .
+        run: black --check . --exclude="(steps/|venv/)"
 
       - name: Run Linter
-        run: ruff check .
+        run: ruff check . --exclude=steps/,venv/

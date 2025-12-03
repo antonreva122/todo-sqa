@@ -11,13 +11,13 @@ def get_user_task_or_404(task_id):
     """
     Retrieve a task by ID and verify it belongs to the current user.
     Returns the task if authorized, otherwise aborts with 404.
-    
+
     Args:
         task_id: The ID of the task to retrieve
-        
+
     Returns:
         Todo: The task object if authorized
-        
+
     Raises:
         404 error: If task doesn't exist or doesn't belong to current user
     """

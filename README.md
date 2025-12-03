@@ -1,3 +1,5 @@
+[![Run Tests](https://github.com/antonreva122/todo-sqa/actions/workflows/main.yml/badge.svg)](https://github.com/antonreva122/todo-sqa/actions/workflows/main.yml)
+
 # Project Overview – Flask Todo App
 
 This project guides learners through the complete development of a fully functional Flask Todo application while progressively introducing professional software engineering and Software Quality Assurance (SQA) practices. Beginning with the simplest routing examples, the project evolves through templating, form handling, secure authentication, and SQLAlchemy-based database integration. It then advances into scalable application architecture using the factory pattern, automated testing with pytest, Behaviour-Driven Development (BDD), Test-Driven Development (TDD), and continuous integration with GitHub Actions.

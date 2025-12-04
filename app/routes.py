@@ -1,6 +1,6 @@
 from app import db
 from flask import render_template, request, redirect, url_for, flash, abort
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, DeleteTaskForm, ToggleTaskForm
 from app.models import User, Todo
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
@@ -64,8 +64,12 @@ def init_routes(app):
     @app.route("/task/<int:task_id>")
     @login_required
     def task(task_id):
-        task = get_user_task_or_404(task_id)
-        return render_template("task.html", task=task)
+        task_obj = get_user_task_or_404(task_id)
+        delete_form = DeleteTaskForm()
+        toggle_form = ToggleTaskForm()
+        return render_template(
+            "task.html", task=task_obj, delete_form=delete_form, toggle_form=toggle_form
+        )
 
     @app.route("/edit-task/<int:task_id>", methods=["GET", "POST"])
     @login_required
@@ -109,11 +113,13 @@ def init_routes(app):
     @app.route("/delete-task/<int:task_id>", methods=["POST"])
     @login_required
     def delete_task(task_id):
-        task = get_user_task_or_404(task_id)
-        task_title = task.title
-        db.session.delete(task)
-        db.session.commit()
-        flash(f"Task '{task_title}' deleted successfully")
+        form = DeleteTaskForm()
+        if form.validate_on_submit():
+            task = get_user_task_or_404(task_id)
+            task_title = task.title
+            db.session.delete(task)
+            db.session.commit()
+            flash(f"Task '{task_title}' deleted successfully")
         return redirect(url_for("all_tasks"))
 
     @app.route("/login", methods=["GET", "POST"])
@@ -164,12 +170,14 @@ def init_routes(app):
     @app.route("/task/<int:task_id>/toggle", methods=["POST"])
     @login_required
     def toggle_task_completion(task_id):
-        task = get_user_task_or_404(task_id)
-        task.completed = not task.completed
-        db.session.commit()
+        form = ToggleTaskForm()
+        if form.validate_on_submit():
+            task = get_user_task_or_404(task_id)
+            task.completed = not task.completed
+            db.session.commit()
 
-        if task.completed:
-            flash(f"Task '{task.title}' marked as completed.")
-        else:
-            flash(f"Task '{task.title}' reopened.")
+            if task.completed:
+                flash(f"Task '{task.title}' marked as completed.")
+            else:
+                flash(f"Task '{task.title}' reopened.")
         return redirect(url_for("all_tasks"))

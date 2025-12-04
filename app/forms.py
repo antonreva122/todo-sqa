@@ -27,3 +27,15 @@ class RegistrationForm(FlaskForm):
         user = db.session.scalar(sa.select(User).where(User.username == username.data))
         if user is not None:
             raise ValidationError("Please use a different username.")
+
+
+class DeleteTaskForm(FlaskForm):
+    """Empty form for CSRF protection on delete task POST requests"""
+
+    submit = SubmitField("Delete")
+
+
+class ToggleTaskForm(FlaskForm):
+    """Empty form for CSRF protection on toggle task completion POST requests"""
+
+    submit = SubmitField("Toggle")

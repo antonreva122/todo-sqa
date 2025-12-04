@@ -27,6 +27,27 @@ def get_user_task_or_404(task_id):
     return task
 
 
+def validate_task_data(title, description):
+    """
+    Validate task title and description.
+
+    Args:
+        title: The task title to validate
+        description: The task description to validate
+
+    Returns:
+        str: Error message if validation fails, None if valid
+    """
+    title = title.strip() if title else ""
+    if not title:
+        return "Title is required"
+    if len(title) > 255:
+        return "Title must be less than 255 characters"
+    if len(description) > 2000:
+        return "Description must be less than 2000 characters"
+    return None
+
+
 def init_routes(app):
     @app.route("/")
     @login_required
@@ -53,14 +74,9 @@ def init_routes(app):
         if request.method == "POST":
             title = request.form.get("title", "").strip()
             description = request.form.get("description", "").strip()
-            if not title:
-                flash("Title is required")
-                return redirect(url_for("edit_task", task_id=task_id))
-            if len(title) > 255:
-                flash("Title must be less than 255 characters")
-                return redirect(url_for("edit_task", task_id=task_id))
-            if len(description) > 2000:
-                flash("Description must be less than 2000 characters")
+            error = validate_task_data(title, description)
+            if error:
+                flash(error)
                 return redirect(url_for("edit_task", task_id=task_id))
             task.title = title
             task.description = description
@@ -75,14 +91,9 @@ def init_routes(app):
         if request.method == "POST":
             title = request.form.get("title", "").strip()
             description = request.form.get("description", "").strip()
-            if not title:
-                flash("Title is required")
-                return redirect(url_for("create_task"))
-            if len(title) > 255:
-                flash("Title must be less than 255 characters")
-                return redirect(url_for("create_task"))
-            if len(description) > 2000:
-                flash("Description must be less than 2000 characters")
+            error = validate_task_data(title, description)
+            if error:
+                flash(error)
                 return redirect(url_for("create_task"))
             task = Todo(
                 title=title,

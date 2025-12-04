@@ -13,8 +13,7 @@
       <li class="navlink"><a href="{{ url_for('login') }}">Login</a></li>
       <li class="navlink"><a href="{{ url_for('register') }}">Register</a></li>
       {% else %}      
-      <li class="navlink"><a href="{{ url_for('all_tasks') }}">View Tasks</a></li>
-      <li class="navlink"><a href="{{ url_for('create_task') }}">New Task</a></li>
+      <li class="navlink"><a href="{{ url_for('all_tasks') }}">My Tasks</a></li>
       <li class="navlink"><a href="{{ url_for('logout') }}">Logout</a></li>
       {% endif %}
       

@@ -146,6 +146,13 @@ def init_routes(app):
             return redirect(url_for("index"))
         form = RegistrationForm()
         if form.validate_on_submit():
+            # Check if username already exists in database
+            existing_user = db.session.scalar(
+                sa.select(User).where(User.username == form.username.data)
+            )
+            if existing_user is not None:
+                flash("Username already taken. Please choose a different one.")
+                return redirect(url_for("register"))
             user = User(username=form.username.data)
             user.set_password(form.password.data)
             db.session.add(user)

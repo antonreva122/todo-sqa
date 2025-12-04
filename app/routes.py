@@ -31,7 +31,7 @@ def init_routes(app):
     @app.route("/")
     @login_required
     def index():
-        todo_count = Todo.query.count()
+        todo_count = Todo.query.filter_by(user_id=current_user.id).count()
         return render_template("index.html", todo_count=todo_count)
 
     @app.route("/tasks")
